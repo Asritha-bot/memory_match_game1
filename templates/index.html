@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Match</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #4f46e5;
@@ -29,7 +29,7 @@ body {
     align-items: center;
     padding: 20px;
     /* Replace the existing background with this beautiful gradient */
-    background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+    background: linear-gradient(120deg, #FFD54F 0%, #FF7043 40%, #7986CB 60%);
 }
 
         .container {
@@ -56,6 +56,15 @@ body {
             margin-bottom: 0.75rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
+        body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+}
+
+.game-title {
+    font-size: 2.5rem;
+    color: #FF6B6B;
+    text-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+}
 
         .stats-container {
             display: flex;
@@ -149,6 +158,15 @@ body {
         @keyframes matched {
             0%, 100% { transform: scale(1) rotateY(180deg); }
             50% { transform: scale(1.1) rotateY(180deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }       
+        }
+
+        .card:hover {
+        animation: bounce 0.5s;
         }
 
         .level-complete {
@@ -313,6 +331,11 @@ body {
     </style>
 </head>
 <body>
+
+    <button class="music-button" id="musicToggle">
+        <i class="fas fa-volume-up" id="musicIcon"></i>
+    </button>
+
     <div class="container">
         <div class="game-header">
             <h1 class="game-title">Memory Match</h1>
@@ -334,7 +357,44 @@ body {
         <div id="game-board" class="game-board"></div>
     </div>
 
+    
+
     <script>
+        // Background Music Initialization
+const backgroundMusic = new Audio('static/audio/puzzle-game-bright-casual-video-game-music-249202.mp3');
+backgroundMusic.loop = true;
+let isMusicPlaying = false;
+
+// Music Toggle Elements
+const musicToggle = document.getElementById('musicToggle');
+const musicIcon = document.getElementById('musicIcon');
+
+// Toggle Music Function
+function toggleMusic() {
+    if (isMusicPlaying) {
+        backgroundMusic.pause();
+        musicIcon.className = 'fas fa-volume-mute';
+    } else {
+        backgroundMusic.play().catch(error => console.log("Audio playback failed:", error));
+        musicIcon.className = 'fas fa-volume-up';
+    }
+    isMusicPlaying = !isMusicPlaying;
+}
+
+// Add Music Toggle Event Listener
+musicToggle.addEventListener('click', toggleMusic);
+
+// Autoplay Workaround
+document.addEventListener('click', function initAudio() {
+    if (!isMusicPlaying) {
+        toggleMusic();
+    }
+    document.removeEventListener('click', initAudio);
+}, { once: true });
+
+        
+
+        
         const allEmojis = [
             '🦊', '🐯', '🦁', '🐼', '🐨', '🐮', '🐷', '🐸', '🦄', '🦒', '🦓', '🦘',
             '🦛', '🦏', '🐘', '🦍', '🦧', '🐪', '🦩', '🦭', '🐢', '🦎', '🐊', '🐅',
@@ -366,24 +426,32 @@ body {
             }
 
             createCard(emoji, index) {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.dataset.index = index;
-                card.dataset.emoji = emoji;
-                
-                const front = document.createElement('div');
-                front.className = 'card-face card-front';
-                front.textContent = emoji;
-                
-                const back = document.createElement('div');
-                back.className = 'card-face card-back';
-                
-                card.appendChild(front);
-                card.appendChild(back);
-                card.addEventListener('click', () => this.flipCard(card));
-                
-                return card;
-            }
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.index = index;
+    card.dataset.emoji = emoji;
+    
+    // Randomly select a vibrant background color
+    const cardBackColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FDCB6E', '#6C5CE7', '#A8E6CF'];
+    const randomColor = cardBackColors[Math.floor(Math.random() * cardBackColors.length)];
+    
+    const front = document.createElement('div');
+    front.className = 'card-face card-front';
+    front.textContent = emoji;
+    front.style.backgroundColor = randomColor;
+    front.style.color = 'white';
+    
+    const back = document.createElement('div');
+    back.className = 'card-face card-back';
+    back.style.background = `linear-gradient(135deg, ${randomColor} 0%, #6A5ACD 100%)`;
+    
+    card.appendChild(front);
+    card.appendChild(back);
+    card.addEventListener('click', () => this.flipCard(card));
+    
+    return card;
+}
+            
 
             initializeGame() {
                 this.currentEmojis = this.getEmojisForLevel();
